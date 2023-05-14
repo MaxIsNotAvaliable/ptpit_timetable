@@ -50,6 +50,7 @@ def GetTimeTableUrl():
     if (timeTableUrlCached == None): CacheTimeTableUrl()
     return timeTableUrlCached
 
+# Простое кэширования для того чтобы не отправлять каждый раз запрос на сервер.
 DataBaseTable = None
 def UpdateLocalTable():
     try:
@@ -120,6 +121,17 @@ def GetUsernameByMessage(message):
             username = f"{username}_{message.chat.last_name}"
     return username
 
+
+# Основной метод, использовавшийся для отправки запроса на сервер.
+# БД на сервере состояла из:
+#
+# id : bigint(255)
+# username : text
+# groupid : int
+# spam_stats : int
+# is_teacher : tinyint
+# teacher_id : int
+#
 def AddToDb(uid, username, gid, isspam, is_teacher, teacher_id):
     print('add user')
     try:
@@ -139,7 +151,7 @@ def AddToDb(uid, username, gid, isspam, is_teacher, teacher_id):
                 teacher_id = user["teacher_id"]
         link = f"{config.bd_url}?id={uid}&username={username}&groupid={gid}&stats={isspam}&is_teacher={is_teacher}&teacher_id={teacher_id}".replace('None', '0')
         requests.get(link, headers = {'user-agent': config.user_agent})
-        UpdateLocalTable()
+        UpdateLocalTable() # Кэширования данных.
     except:
         return False
     return True
